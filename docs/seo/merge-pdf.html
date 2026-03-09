@@ -15,231 +15,772 @@
   <meta name="twitter:description" content="Merge PDF files in seconds. Install PDF-X from the App Store.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #f4f7fb;
-      --ink: #0f172a;
-      --muted: #334155;
-      --card: #ffffff;
-      --brand: #0ea5e9;
-      --brand-2: #06b6d4;
-      --accent: #f59e0b;
-      --border: #dbe6f2;
-      --shadow: 0 14px 44px rgba(15, 23, 42, 0.11);
+      --bg: #060a12;
+      --bg2: #0b1120;
+      --ink: #f0f4ff;
+      --muted: #7a8aaa;
+      --card: rgba(255,255,255,0.03);
+      --card-border: rgba(255,255,255,0.07);
+      --blue: #2563eb;
+      --blue-bright: #3b82f6;
+      --blue-glow: rgba(37,99,235,0.35);
+      --cyan: #06b6d4;
+      --accent: #60a5fa;
     }
-    * { box-sizing: border-box; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      margin: 0;
-      font-family: "Space Grotesk", sans-serif;
+      font-family: "DM Sans", sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(900px 500px at 95% -10%, #b9ecff 0%, transparent 60%),
-        radial-gradient(900px 500px at -20% 35%, #ffe5bf 0%, transparent 55%),
-        var(--bg);
-      line-height: 1.55;
+      background: var(--bg);
+      line-height: 1.6;
+      overflow-x: hidden;
     }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── AMBIENT BLOBS ── */
+    .ambient {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .amb-1 {
+      width: 700px; height: 600px;
+      background: radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .amb-2 {
+      width: 500px; height: 400px;
+      background: radial-gradient(ellipse, rgba(6,182,212,0.1) 0%, transparent 70%);
+      bottom: 100px; left: -150px;
+    }
+    .amb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(ellipse, rgba(37,99,235,0.12) 0%, transparent 70%);
+      top: 50%; left: 40%;
+    }
+
+    /* ── LAYOUT ── */
     .wrap {
-      max-width: 1080px;
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 28px 16px 64px;
+      padding: 40px 20px 80px;
     }
+
+    /* ── NAV BAR ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 64px;
+    }
+    .logo {
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .logo span {
+      background: linear-gradient(135deg, var(--blue-bright), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-pill {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(37,99,235,0.12);
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 999px;
+      padding: 6px 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── HERO ── */
     .hero {
-      background: linear-gradient(145deg, #ffffff 10%, #f3fbff 100%);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 26px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      margin-bottom: 100px;
+    }
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-visual { display: none; }
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(37,99,235,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 999px;
+      padding: 6px 14px;
+      margin-bottom: 22px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .hero-eyebrow::before {
+      content: "";
+      width: 7px; height: 7px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+      margin-bottom: 18px;
+    }
+    h1 .grad {
+      background: linear-gradient(135deg, #fff 30%, var(--blue-bright) 70%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.05rem;
+      font-weight: 400;
+      max-width: 440px;
+      margin-bottom: 32px;
+      line-height: 1.65;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-family: "DM Sans", sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.22s ease;
       position: relative;
       overflow: hidden;
     }
-    .pill {
-      display: inline-block;
-      font-size: 0.8rem;
-      color: #0b4a6b;
-      background: #d8f4ff;
-      border: 1px solid #aee8ff;
-      border-radius: 999px;
-      padding: 6px 12px;
-      margin-bottom: 14px;
-      font-weight: 600;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      line-height: 1.06;
-      letter-spacing: -0.03em;
-      max-width: 650px;
-    }
-    .subtitle {
-      margin: 0 0 18px;
-      color: var(--muted);
-      font-size: 1.04rem;
-      max-width: 620px;
-    }
-    .cta-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .cta {
-      display: inline-block;
-      padding: 12px 16px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: 700;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
     .cta.primary {
       color: #fff;
-      background: linear-gradient(130deg, var(--brand) 0%, var(--brand-2) 100%);
-      box-shadow: 0 8px 18px rgba(6, 182, 212, 0.38);
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-bright) 60%, var(--cyan) 100%);
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.4), 0 12px 32px rgba(37,99,235,0.45);
+    }
+    .cta.primary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+      border-radius: inherit;
+    }
+    .cta.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.6), 0 18px 40px rgba(37,99,235,0.55);
     }
     .cta.secondary {
-      color: var(--ink);
-      background: #fff;
-      border: 1px solid var(--border);
-    }
-    .cta:hover { transform: translateY(-1px); }
-    .meta {
-      color: #64748b;
-      font-size: 0.9rem;
-      margin-top: 8px;
-    }
-    .grid {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-    }
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 1.05rem;
-    }
-    .card p {
-      margin: 0;
       color: var(--muted);
-      font-size: 0.96rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+    }
+    .cta.secondary:hover {
+      color: var(--ink);
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+    }
+
+    .meta-trust {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .meta-trust::before {
+      content: "★★★★★";
+      color: var(--blue-bright);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+    }
+
+    /* ── HERO VISUAL ── */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .phone-mock {
+      width: 220px;
+      height: 420px;
+      background: linear-gradient(160deg, #111827 0%, #0f172a 100%);
+      border-radius: 36px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      box-shadow:
+        0 0 0 1px rgba(37,99,235,0.15),
+        0 40px 80px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+      animation: float 5s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(1deg); }
+      50% { transform: translateY(-14px) rotate(-0.5deg); }
+    }
+    .phone-screen {
+      margin: 12px 10px;
+      height: calc(100% - 24px);
+      background: #0b1120;
+      border-radius: 28px;
+      overflow: hidden;
+      padding: 20px 14px;
+    }
+    .phone-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .phone-dot {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      box-shadow: 0 4px 14px rgba(37,99,235,0.5);
+    }
+    .phone-label {
+      font-family: "Syne", sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .pdf-file {
+      background: rgba(37,99,235,0.1);
+      border: 1px solid rgba(37,99,235,0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
+    }
+    .pdf-file:nth-child(1) { animation: slideIn 0.6s 0.2s both ease-out; }
+    .pdf-file:nth-child(2) { animation: slideIn 0.6s 0.4s both ease-out; }
+    .pdf-file:nth-child(3) { animation: slideIn 0.6s 0.6s both ease-out; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .pdf-icon {
+      width: 28px; height: 32px;
+      background: linear-gradient(135deg, var(--blue-bright), var(--cyan));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .pdf-info { flex: 1; }
+    .pdf-name { font-size: 0.65rem; color: var(--ink); font-weight: 600; }
+    .pdf-size { font-size: 0.58rem; color: var(--muted); }
+    .merge-btn-mock {
+      margin-top: 16px;
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: "Syne", sans-serif;
+      box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+    }
+
+    /* orbiting ring */
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(37,99,235,0.15);
+    }
+    .ring-1 {
+      width: 320px; height: 320px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 20s linear infinite;
+    }
+    .ring-2 {
+      width: 420px; height: 420px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin 30s linear infinite reverse;
+      border-style: dashed;
+      opacity: 0.4;
+    }
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    .ring-dot {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: var(--blue-bright);
+      border-radius: 50%;
+      top: -4px; left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 12px var(--blue-bright);
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue-bright);
+      margin-bottom: 10px;
     }
     h2 {
-      margin: 30px 0 12px;
-      font-size: 1.35rem;
-      letter-spacing: -0.02em;
+      font-family: "Syne", sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 28px;
+      line-height: 1.15;
     }
-    .steps p, .faq p {
-      margin: 0 0 10px;
+
+    /* ── FEATURES ── */
+    .features { margin-bottom: 100px; }
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .feat-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top left, rgba(37,99,235,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .feat-card:hover {
+      border-color: rgba(59,130,246,0.3);
+      transform: translateY(-3px);
+    }
+    .feat-icon {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, rgba(37,99,235,0.25), rgba(6,182,212,0.15));
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+    }
+    .feat-card h3 {
+      font-family: "Syne", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .feat-card p {
       color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
     }
-    .faq-item + .faq-item {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
+
+    /* ── STEPS ── */
+    .steps-section { margin-bottom: 100px; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: "";
+      position: absolute;
+      top: 28px; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(37,99,235,0.3), rgba(6,182,212,0.3), transparent);
     }
     @media (max-width: 640px) {
-      .wrap { padding-top: 18px; }
-      .hero { border-radius: 18px; padding: 18px; }
-      .cta { width: 100%; text-align: center; }
+      .steps-grid::before { display: none; }
+    }
+    .step {
+      text-align: center;
+      padding: 0 16px 24px;
+      position: relative;
+    }
+    .step-num {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.15), 0 8px 24px rgba(37,99,235,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+      margin: 0 auto 18px;
+      position: relative;
+      z-index: 1;
+    }
+    .step h3 {
+      font-family: "Syne", sans-serif;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+    .step p {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    /* ── FAQ ── */
+    .faq-section { margin-bottom: 100px; }
+    .faq-list { display: flex; flex-direction: column; gap: 2px; }
+    .faq-item {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      transition: border-color 0.2s;
+    }
+    .faq-item:hover { border-color: rgba(59,130,246,0.25); }
+    .faq-item strong {
+      display: block;
+      font-family: "Syne", sans-serif;
+      font-weight: 700;
+      font-size: 0.97rem;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .faq-item p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+      background: linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(6,182,212,0.06) 100%);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 24px;
+      padding: 48px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-banner::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(37,99,235,0.15) 0%, transparent 70%);
+    }
+    .cta-banner h2 {
+      font-family: "Syne", sans-serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .cta-banner p {
+      color: var(--muted);
+      margin-bottom: 28px;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+    .cta-banner .cta-row {
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+      margin: 0 0 60px;
+    }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      animation: fadeUp 0.6s ease-out forwards;
+    }
+    .fade-up:nth-child(1) { animation-delay: 0.1s; }
+    .fade-up:nth-child(2) { animation-delay: 0.2s; }
+    .fade-up:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .cta-banner { padding: 32px 20px; }
+      .cta { width: 100%; text-align: center; justify-content: center; }
     }
   </style>
+
   <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "How do I merge PDF files on iPhone?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Install PDF-X from the App Store, choose Merge PDF, select files, reorder, and export."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is PDF-X free to start?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. PDF-X has a free experience with optional low-cost upgrade plans."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can I use PDF-X for other tools too?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. You can merge, split, compress, and convert files inside the app."
-          }
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I merge PDF files on iPhone?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install PDF-X from the App Store, choose Merge PDF, select files, reorder, and export."
         }
-      ]
-    }
+      },
+      {
+        "@type": "Question",
+        "name": "Is PDF-X free to start?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. PDF-X has a free experience with optional low-cost upgrade plans."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use PDF-X for other tools too?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can merge, split, compress, and convert files inside the app."
+        }
+      }
+    ]
+  }
   </script>
 </head>
 <body>
+
+  <div class="ambient amb-1"></div>
+  <div class="ambient amb-2"></div>
+  <div class="ambient amb-3"></div>
+
   <main class="wrap">
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a class="logo" href="#">PDF<span>-X</span></a>
+      <span class="nav-pill">iPhone App</span>
+    </nav>
+
+    <!-- HERO -->
     <section class="hero">
-      <span class="pill">iPhone App</span>
-      <h1>Merge PDF Files in Seconds with PDF-X</h1>
-      <p class="subtitle">Built for real daily work: combine documents fast, keep quality clean, and finish your workflow in under a minute.</p>
-      <div class="cta-row">
-        <a class="cta primary" href="https://apps.apple.com/pk/app/pdf-x/id6740541651?utm_source=seo&utm_medium=github_pages&utm_campaign=merge_pdf" target="_blank" rel="noopener">Download on the App Store</a>
-        <a class="cta secondary" href="#how-to-merge">See How It Works</a>
+      <div class="hero-content">
+        <div class="hero-eyebrow">Merge PDF</div>
+        <h1><span class="grad">Merge PDFs<br>in Seconds.</span></h1>
+        <p class="subtitle">Built for real daily work — combine documents fast, keep quality clean, and finish your workflow in under a minute.</p>
+        <div class="cta-row">
+          <a class="cta primary" href="https://apps.apple.com/pk/app/pdf-x/id6740541651?utm_source=seo&utm_medium=github_pages&utm_campaign=merge_pdf" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            Download on the App Store
+          </a>
+          <a class="cta secondary" href="#how-to-merge">See How It Works</a>
+        </div>
+        <p class="meta-trust">Trusted by freelancers, students & small teams</p>
       </div>
-      <p class="meta">Trusted workflow for freelancers, students, and small teams handling PDFs every day.</p>
+
+      <div class="hero-visual">
+        <div class="ring ring-1"><div class="ring-dot"></div></div>
+        <div class="ring ring-2"></div>
+        <div class="phone-mock">
+          <div class="phone-screen">
+            <div class="phone-topbar">
+              <div class="phone-dot"></div>
+              <div class="phone-label">PDF-X</div>
+            </div>
+            <div class="pdf-file">
+              <div class="pdf-icon">PDF</div>
+              <div class="pdf-info">
+                <div class="pdf-name">Contract_2024.pdf</div>
+                <div class="pdf-size">2.3 MB</div>
+              </div>
+            </div>
+            <div class="pdf-file">
+              <div class="pdf-icon">PDF</div>
+              <div class="pdf-info">
+                <div class="pdf-name">Invoice_April.pdf</div>
+                <div class="pdf-size">1.1 MB</div>
+              </div>
+            </div>
+            <div class="pdf-file">
+              <div class="pdf-icon">PDF</div>
+              <div class="pdf-info">
+                <div class="pdf-name">Appendix_B.pdf</div>
+                <div class="pdf-size">840 KB</div>
+              </div>
+            </div>
+            <div class="merge-btn-mock">Merge 3 Files →</div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section>
-      <h2>Why People Choose PDF-X for Merge PDF</h2>
-      <div class="grid">
-        <article class="card">
+    <div class="divider"></div>
+
+    <!-- FEATURES -->
+    <section class="features">
+      <p class="section-label">Why PDF-X</p>
+      <h2>Everything you need,<br>nothing you don't.</h2>
+      <div class="feat-grid">
+        <article class="feat-card fade-up">
+          <div class="feat-icon">⚡</div>
           <h3>Fast Result</h3>
-          <p>Select files, reorder pages, and export one final PDF in a few taps.</p>
+          <p>Select files, reorder pages, and export one final PDF in a few taps. No waiting, no uploads, no web forms.</p>
         </article>
-        <article class="card">
-          <h3>Mobile Friendly</h3>
-          <p>Optimized for iPhone so you can handle documents on the go.</p>
+        <article class="feat-card fade-up">
+          <div class="feat-icon">📱</div>
+          <h3>Mobile First</h3>
+          <p>Optimized for iPhone so you can handle documents on the go — commute, coffee shop, anywhere.</p>
         </article>
-        <article class="card">
+        <article class="feat-card fade-up">
+          <div class="feat-icon">🛠</div>
           <h3>All-in-One Toolkit</h3>
-          <p>After merge, use split, compress, and convert tools in the same app.</p>
+          <p>After merge, use split, compress, and convert tools in the same app. One download covers every PDF need.</p>
         </article>
       </div>
     </section>
 
-    <section id="how-to-merge" class="steps">
-      <h2>How to Merge PDF Files</h2>
-      <div class="card">
-        <p>1. Install PDF-X from the App Store.</p>
-        <p>2. Open Merge PDF and select your files.</p>
-        <p>3. Reorder pages and tap merge.</p>
-        <p>4. Export your final merged PDF.</p>
+    <div class="divider"></div>
+
+    <!-- HOW TO MERGE -->
+    <section id="how-to-merge" class="steps-section">
+      <p class="section-label">How It Works</p>
+      <h2>Done in four steps.</h2>
+      <div class="steps-grid">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Install PDF-X</h3>
+          <p>Download free from the App Store in seconds.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Select Files</h3>
+          <p>Open Merge PDF and pick your documents from Files or Photos.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Reorder & Merge</h3>
+          <p>Drag to reorder pages, then tap merge to combine.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>Export</h3>
+          <p>Save, share, or AirDrop your final merged PDF instantly.</p>
+        </div>
       </div>
     </section>
 
-    <section class="faq">
-      <h2>FAQ</h2>
-      <div class="card">
+    <div class="divider"></div>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <p class="section-label">FAQ</p>
+      <h2>Common questions.</h2>
+      <div class="faq-list">
         <div class="faq-item">
           <strong>Does PDF-X keep quality after merge?</strong>
-          <p>Yes, merged files keep clean output quality for normal document workflows.</p>
+          <p>Yes, merged files keep clean output quality for normal document workflows — no compression artifacts.</p>
         </div>
         <div class="faq-item">
           <strong>Can I merge scanned PDFs?</strong>
-          <p>Yes, scanned and regular PDFs can both be merged in the same flow.</p>
+          <p>Yes, scanned and regular PDFs can both be merged in the same flow without any extra steps.</p>
+        </div>
+        <div class="faq-item">
+          <strong>Is PDF-X free to start?</strong>
+          <p>Yes. PDF-X has a free experience with optional low-cost upgrade plans for power users.</p>
+        </div>
+        <div class="faq-item">
+          <strong>Can I use PDF-X for other tools too?</strong>
+          <p>Absolutely. You can merge, split, compress, and convert files all inside the same app.</p>
         </div>
         <div class="faq-item">
           <strong>Where can I install PDF-X?</strong>
-          <p>Use the App Store button above to open the official iOS app listing.</p>
+          <p>Use the App Store button above or below to open the official iOS app listing directly.</p>
         </div>
       </div>
     </section>
+
+    <!-- CTA BANNER -->
+    <section class="cta-banner">
+      <h2>Ready to merge your PDFs?</h2>
+      <p>Join thousands of users who handle their documents faster with PDF-X every day.</p>
+      <div class="cta-row">
+        <a class="cta primary" href="https://apps.apple.com/pk/app/pdf-x/id6740541651?utm_source=seo&utm_medium=github_pages&utm_campaign=merge_pdf" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download on the App Store
+        </a>
+      </div>
+    </section>
+
   </main>
 </body>
 </html>
